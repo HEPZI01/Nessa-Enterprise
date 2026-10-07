@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nessa Enterprise - Separate Customer and Admin Portal Login.">
+  <title>Sign In — Nessa Enterprise</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom Styles -->
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="login-page">
+    <!-- Decorative Elements -->
+    <div style="position:absolute;top:10%;left:8%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%);z-index:0;"></div>
+    <div style="position:absolute;bottom:10%;right:8%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%);z-index:0;"></div>
+
+    <div style="max-width: 440px; width: 100%; z-index: 1;">
+      <!-- Portal Tab Switcher -->
+      <div class="d-flex p-1 mb-3 rounded-pill" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15);">
+        <button type="button" id="tabCustomerBtn" class="btn flex-fill rounded-pill py-2 fw-bold btn-primary" onclick="setPortalTab('customer')">
+          <i class="bi bi-cart3 me-1"></i> Customer Login
+        </button>
+        <button type="button" id="tabAdminBtn" class="btn flex-fill rounded-pill py-2 fw-bold text-white border-0 opacity-75" onclick="setPortalTab('admin')">
+          <i class="bi bi-shield-lock me-1"></i> Admin Portal
+        </button>
+      </div>
+
+      <div class="login-card animate-fadeInUp">
+        <!-- Brand -->
+        <div class="login-brand">
+          <div class="login-brand-icon" id="portalIcon">N</div>
+          <h2 id="portalTitle">Customer Sign In</h2>
+          <p id="portalSub">Sign in to your Nessa Store account</p>
+        </div>
+
+        <!-- Error -->
+        <div class="login-error" id="loginError"></div>
+
+        <!-- Form -->
+        <form id="loginForm" autocomplete="off">
+          <input type="hidden" id="portalTypeInput" value="customer">
+
+          <div class="mb-3">
+            <label class="form-label" for="loginEmail" id="emailLabel">Email Address</label>
+            <div class="position-relative">
+              <input type="email" class="form-control" id="loginEmail" placeholder="customer@nessa.com" value="customer@nessa.com" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label d-flex justify-content-between" for="loginPassword">
+              Password
+              <a href="#" style="color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;">Forgot password?</a>
+            </label>
+            <div class="position-relative">
+              <input type="password" class="form-control" id="loginPassword" placeholder="Enter password" value="customer123" required>
+              <button type="button" id="togglePassword" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="rememberMe" checked>
+              <label class="form-check-label" for="rememberMe" style="color:rgba(255,255,255,0.5);font-size:13px;">Remember me</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-login" id="loginSubmitBtn">Sign In as Customer</button>
+        </form>
+
+        <!-- Demo Credentials -->
+        <div class="mt-4 text-center" style="border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
+          <div id="demoCredentials" style="color:rgba(255,255,255,0.4);font-size:12px;margin:0;">
+            Demo: customer@nessa.com / customer123
+          </div>
+          <p style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:15px;margin-bottom:0;" id="signupText">
+            Don't have an account? <a href="register.html" style="color:var(--primary-300);text-decoration:none;font-weight:600;">Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SheetJS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Custom JS -->
+  <script src="js/excelService.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function setPortalTab(type) {
+      const customerBtn = document.getElementById('tabCustomerBtn');
+      const adminBtn = document.getElementById('tabAdminBtn');
+      const portalTypeInput = document.getElementById('portalTypeInput');
+      const portalTitle = document.getElementById('portalTitle');
+      const portalSub = document.getElementById('portalSub');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+      const emailInput = document.getElementById('loginEmail');
+      const passwordInput = document.getElementById('loginPassword');
+      const demoCreds = document.getElementById('demoCredentials');
+      const signupText = document.getElementById('signupText');
+
+      portalTypeInput.value = type;
+
+      if (type === 'admin') {
+        customerBtn.className = 'btn flex-fill rounded-pill py-2 fw-bold text-white border-0 opacity-75';
+        adminBtn.className = 'btn flex-fill rounded-pill py-2 fw-bold btn-warning text-dark';
+        
+        portalTitle.textContent = 'Admin & Staff Portal';
+        portalSub.textContent = 'Authorized management access';
+        submitBtn.textContent = 'Sign In to Admin Panel';
+        submitBtn.className = 'btn-login bg-warning text-dark';
+        
+        emailInput.value = 'admin@nessa.com';
+        passwordInput.value = 'admin123';
+        demoCreds.innerHTML = 'Demo Admin: admin@nessa.com / admin123';
+        signupText.innerHTML = 'Need customer access? <a href="#" onclick="setPortalTab(\'customer\')" style="color:var(--primary-300);text-decoration:none;font-weight:600;">Customer Login</a>';
+      } else {
+        customerBtn.className = 'btn flex-fill rounded-pill py-2 fw-bold btn-primary';
+        adminBtn.className = 'btn flex-fill rounded-pill py-2 fw-bold text-white border-0 opacity-75';
+        
+        portalTitle.textContent = 'Customer Sign In';
+        portalSub.textContent = 'Sign in to your Nessa Store account';
+        submitBtn.textContent = 'Sign In as Customer';
+        submitBtn.className = 'btn-login';
+        
+        emailInput.value = 'customer@nessa.com';
+        passwordInput.value = 'customer123';
+        demoCreds.innerHTML = 'Demo Customer: customer@nessa.com / customer123';
+        signupText.innerHTML = 'Don\'t have an account? <a href="register.html" style="color:var(--primary-300);text-decoration:none;font-weight:600;">Sign up</a>';
+      }
+      
+      const errBox = document.getElementById('loginError');
+      if (errBox) errBox.classList.remove('show');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('nessa_session')) {
+        localStorage.removeItem('nessa_session');
+      }
+
+      if (Auth.isLoggedIn()) {
+        Auth.redirectByRole();
+      }
+      Auth.init();
+    });
+  </script>
+</body>
+</html>

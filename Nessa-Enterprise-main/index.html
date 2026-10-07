@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nessa Enterprise — Redirecting...</title>
+  <script src="js/auth.js"></script>
+</head>
+<body style="background:#0f172a; color:#fff; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;">
+  <div style="text-align:center;">
+    <div style="width:40px; height:40px; border:4px solid rgba(255,255,255,0.1); border-top-color:#6366f1; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 20px;"></div>
+    <p style="opacity:0.8; font-size:14px;">Redirecting you to the right place...</p>
+  </div>
+  
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    // Immediate check to prevent blinking/flicker
+    if (Auth.isLoggedIn()) {
+      Auth.redirectByRole();
+    } else {
+      window.location.replace('login.html');
+    }
+  </script>
+</body>
+</html>

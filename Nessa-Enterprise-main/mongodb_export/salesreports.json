@@ -1,0 +1,62 @@
+[
+  {
+    "month": "Jan",
+    "revenue": 310600,
+    "orders": 10
+  },
+  {
+    "month": "Feb",
+    "revenue": 303700,
+    "orders": 12
+  },
+  {
+    "month": "Mar",
+    "revenue": 388900,
+    "orders": 13
+  },
+  {
+    "month": "Apr",
+    "revenue": 611400,
+    "orders": 19
+  },
+  {
+    "month": "May",
+    "revenue": 732800,
+    "orders": 21
+  },
+  {
+    "month": "Jun",
+    "revenue": 643000,
+    "orders": 13
+  },
+  {
+    "month": "Jul",
+    "revenue": 673200,
+    "orders": 17
+  },
+  {
+    "month": "Aug",
+    "revenue": 487000,
+    "orders": 16
+  },
+  {
+    "month": "Sep",
+    "revenue": 615600,
+    "orders": 18
+  },
+  {
+    "month": "Oct",
+    "revenue": 293900,
+    "orders": 10
+  },
+  {
+    "month": "Nov",
+    "revenue": 458500,
+    "orders": 13
+  },
+  {
+    "month": "Dec",
+    "revenue": 627300,
+    "orders": 18
+  }
+]

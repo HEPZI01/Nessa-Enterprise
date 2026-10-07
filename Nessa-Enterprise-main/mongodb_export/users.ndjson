@@ -1,0 +1,6 @@
+{"id":1,"name":"Admin User","email":"admin@nessa.com","password":"admin123","role":"Admin"}
+{"id":2,"name":"Sarah Johnson","email":"sarah@nessa.com","password":"sarah123","role":"Manager"}
+{"id":3,"name":"James Wilson","email":"james@nessa.com","password":"james123","role":"Staff"}
+{"id":4,"name":"Emily Davis","email":"emily@nessa.com","password":"emily123","role":"Staff"}
+{"id":5,"name":"Michael Brown","email":"michael@nessa.com","password":"michael123","role":"Manager"}
+{"id":6,"name":"Test Customer","email":"customer@nessa.com","password":"customer123","role":"Customer"}

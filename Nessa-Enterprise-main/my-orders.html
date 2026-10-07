@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders — Nessa Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    body { background-color: var(--bg-body); color: var(--text-primary); }
+    .store-navbar { background: var(--bg-surface); border-bottom: 1px solid var(--border-color); padding: 15px 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm); }
+    .store-brand { font-weight: 800; font-size: 24px; color: var(--primary-600); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .store-brand .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary-500), var(--primary-600)); color: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .page-title { font-weight: 800; font-size: 2rem; margin: 40px 0 20px; }
+    .order-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .order-header { padding: 15px 20px; background: var(--input-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .order-body { padding: 20px; }
+    .order-item { display: flex; gap: 15px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+    .order-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .order-item-img { width: 60px; height: 60px; background: var(--input-bg); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item-info { flex-grow: 1; }
+    .order-item-title { font-weight: 600; font-size: 15px; margin-bottom: 5px; color: var(--text-primary); }
+    .order-item-meta { color: var(--text-muted); font-size: 13px; }
+    .order-status { font-weight: 600; padding: 5px 12px; border-radius: 20px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .status-shipped { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .status-delivered { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="store-navbar">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a href="store.html" class="store-brand">
+        <div class="brand-icon">N</div>
+        Nessa Store
+      </a>
+      
+      <div class="nav-actions">
+        <a href="store.html" class="btn btn-nessa-outline btn-sm me-3"><i class="bi bi-shop me-1"></i>Back to Store</a>
+        <div class="dropdown">
+          <button class="profile-dropdown dropdown-toggle" data-bs-toggle="dropdown" style="padding:5px 10px; border-radius:20px; background:var(--bg-surface); border:1px solid var(--border-color); display:flex; align-items:center; gap:8px;">
+            <div class="profile-avatar" style="width:30px;height:30px;font-size:12px;">C</div>
+            <span class="d-none d-sm-block fw-semibold" style="font-size:14px;" id="userName">User</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><a class="dropdown-item py-2 active" href="my-orders.html"><i class="bi bi-bag-check me-2"></i>My Orders</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item py-2 text-danger logout-link" href="#"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mb-5 pb-5">
+    <h1 class="page-title">Order History</h1>
+    <div id="ordersContainer">
+      <div class="text-center py-5 text-muted w-100">
+        <div class="spinner-border text-primary shadow-sm mb-3"></div>
+        <p>Loading your orders...</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="js/excelService.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth()) return;
+      
+      const session = Auth.getSession();
+      document.getElementById('userName').textContent = session.name;
+      document.querySelector('.profile-avatar').textContent = session.name[0].toUpperCase();
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('nessa_theme') || 'light');
+
+      await ExcelService.loadData();
+      const allOrders = ExcelService.getOrders();
+      const products = ExcelService.getProducts();
+
+      // Filter to only this user's orders
+      const myOrders = allOrders.filter(o => o.userId === session.id);
+      
+      // Group them by Date to create a cohesive Order group (since each item is its own row in the excel)
+      // We will group by date and status, or maybe just Date for simplicity, assuming they checked out at once.
+      // But standard e-commerce groups by Order ID. Our Excel has an ID per row, which represents one item.
+      // Let's just group by Date and give them a pseudo Order Number based on Date.
+      
+      const orderGroups = {};
+      myOrders.forEach(o => {
+        const key = o.date;
+        if (!orderGroups[key]) {
+          orderGroups[key] = {
+            date: o.date,
+            status: o.status,
+            total: 0,
+            items: []
+          };
+        }
+        orderGroups[key].items.push(o);
+        orderGroups[key].total += o.total;
+        // Keep the latest status if mixed
+        if (o.status === 'Delivered') orderGroups[key].status = 'Delivered';
+        else if (o.status === 'Shipped' && orderGroups[key].status !== 'Delivered') orderGroups[key].status = 'Shipped';
+      });
+
+      const groupedArray = Object.values(orderGroups).sort((a,b) => new Date(b.date) - new Date(a.date));
+      const container = document.getElementById('ordersContainer');
+
+      if (groupedArray.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <i class="bi bi-box-seam text-muted mb-3 d-block" style="font-size:60px;opacity:0.5;"></i>
+            <h4 class="text-muted">You haven't placed any orders yet.</h4>
+            <a href="store.html" class="btn btn-nessa-primary mt-3">Start Shopping</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = groupedArray.map(group => {
+        let statusClass = 'status-pending';
+        let statusIcon = 'bi-clock-history';
+        if (group.status === 'Shipped') { statusClass = 'status-shipped'; statusIcon = 'bi-truck'; }
+        if (group.status === 'Delivered') { statusClass = 'status-delivered'; statusIcon = 'bi-check-circle'; }
+
+        const dateObj = new Date(group.date);
+        const hasTime = group.date && group.date.includes('T');
+        const dateStr = dateObj.toLocaleString('en-US', { 
+          year: 'numeric', month: 'long', day: 'numeric',
+          ...(hasTime ? { hour: 'numeric', minute: '2-digit' } : {})
+        });
+        const safeGroupDate = group.date.split('T')[0].replace(/-/g, '');
+        const pseudoId = 'ORD-' + safeGroupDate + '-' + group.items[0].id;
+
+        const itemsHtml = group.items.map(item => {
+          const prod = products.find(p => p.id === item.productId);
+          const name = prod ? prod.name : item.productName;
+          const safeName = name.replace(/"/g, '&quot;');
+          const imgSrc = prod && prod.image && (prod.image.startsWith('http://') || prod.image.startsWith('https://')) 
+            ? `<img src="${prod.image}" alt="${safeName}">` 
+            : '<img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop" alt="Product">';
+          return `
+            <div class="order-item">
+              <div class="order-item-img">${imgSrc}</div>
+              <div class="order-item-info">
+                <div class="order-item-title">${name}</div>
+                <div class="order-item-meta">Qty: ${item.quantity}  |  Price: $${(item.total/item.quantity).toFixed(2)}</div>
+              </div>
+              <div class="fw-bold">$${item.total.toFixed(2)}</div>
+            </div>`;
+        }).join('');
+
+        return `
+          <div class="order-card">
+            <div class="order-header">
+              <div>
+                <span class="text-muted" style="font-size:13px; display:block;">Order Placed</span>
+                <span class="fw-semibold">${dateStr}</span>
+              </div>
+              <div>
+                <span class="text-muted" style="font-size:13px; display:block;">Total</span>
+                <span class="fw-semibold">$${group.total.toFixed(2)}</span>
+              </div>
+              <div class="ms-auto text-end">
+                <span class="text-muted" style="font-size:13px; display:block;">Order #</span>
+                <span class="fw-semibold">${pseudoId}</span>
+              </div>
+              <div class="text-end">
+                <span class="text-muted" style="font-size:13px; display:block;">Payment</span>
+                <span class="fw-semibold">${group.paymentMethod || 'COD'}</span>
+              </div>
+            </div>
+            <div class="order-body">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 fw-bold">Items Status</h5>
+                <span class="order-status ${statusClass}"><i class="bi ${statusIcon}"></i> ${group.status}</span>
+              </div>
+              ${itemsHtml}
+            </div>
+          </div>`;
+      }).join('');
+
+      document.querySelectorAll('.logout-link').forEach(el => el.addEventListener('click', Auth.logout));
+
+      // Real-time status updates from admin
+      try {
+        const socket = io('http://localhost:3000');
+        socket.on('order_status_updated', async () => {
+          await ExcelService.loadData(true);
+          location.reload();
+        });
+      } catch(e) {}
+    });
+  </script>
+</body>
+</html>

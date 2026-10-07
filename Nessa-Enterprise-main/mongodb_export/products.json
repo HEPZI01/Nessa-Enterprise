@@ -1,0 +1,227 @@
+[
+  {
+    "id": 1,
+    "name": "Lena Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 18000,
+    "stock": 45,
+    "description": "Lena Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Zuno Lite Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 16500,
+    "stock": 52,
+    "description": "Zuno Lite Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/DyIVu3VaZbRyZ-large.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Lena+ Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 20000,
+    "stock": 38,
+    "description": "Lena+ Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/psvq6DLOzqttv-large.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Genie Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 22000,
+    "stock": 24,
+    "description": "Genie Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/znMu7c7wuIjVC-large.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Zuno Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 21000,
+    "stock": 29,
+    "description": "Zuno Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/7WiKsPkpDiVTI-large.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Steelix Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 35000,
+    "stock": 15,
+    "description": "Steelix Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/vOBjufdKe3f99-large.png"
+  },
+  {
+    "id": 7,
+    "name": "Nile Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 45000,
+    "stock": 10,
+    "description": "Nile Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/HvotdQutwswmH-large.png"
+  },
+  {
+    "id": 8,
+    "name": "Nile+ Series Borewell Submersible Pump",
+    "category": "Submersible Pump",
+    "price": 48000,
+    "stock": 12,
+    "description": "Nile+ Series Borewell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/b5t0gJ8GEnbKj-large.jpg"
+  },
+  {
+    "id": 9,
+    "name": "Ryker Series Vertical Openwell Submersible Pump",
+    "category": "Openwell Pump",
+    "price": 18500,
+    "stock": 33,
+    "description": "Ryker Series Vertical Openwell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/t17jVkK36RU9T-large.png"
+  },
+  {
+    "id": 10,
+    "name": "LTK Series Vertical Openwell Submersible Pump",
+    "category": "Openwell Pump",
+    "price": 17000,
+    "stock": 27,
+    "description": "LTK Series Vertical Openwell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/PXZfo5UfRnAi1-large.png"
+  },
+  {
+    "id": 11,
+    "name": "CV Series Openwell Submersible Pump",
+    "category": "Openwell Pump",
+    "price": 16500,
+    "stock": 40,
+    "description": "CV Series Openwell Submersible Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/DyIVu3VaZbRyZ-large.jpg"
+  },
+  {
+    "id": 12,
+    "name": "CSM Series Horizontal Openwell Pump",
+    "category": "Openwell Pump",
+    "price": 19000,
+    "stock": 41,
+    "description": "CSM Series Horizontal Openwell Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/7WiKsPkpDiVTI-large.jpg"
+  },
+  {
+    "id": 13,
+    "name": "CSM-J Series Openwell Pump",
+    "category": "Openwell Pump",
+    "price": 20500,
+    "stock": 18,
+    "description": "CSM-J Series Openwell Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/vOBjufdKe3f99-large.png"
+  },
+  {
+    "id": 14,
+    "name": "CSS Series Openwell Pump",
+    "category": "Openwell Pump",
+    "price": 21000,
+    "stock": 22,
+    "description": "CSS Series Openwell Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/HvotdQutwswmH-large.png"
+  },
+  {
+    "id": 15,
+    "name": "Plano Series Openwell Pump",
+    "category": "Openwell Pump",
+    "price": 18500,
+    "stock": 35,
+    "description": "Plano Series Openwell Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/b5t0gJ8GEnbKj-large.jpg"
+  },
+  {
+    "id": 16,
+    "name": "Dino Series Openwell Pump",
+    "category": "Openwell Pump",
+    "price": 17800,
+    "stock": 65,
+    "description": "Dino Series Openwell Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/t17jVkK36RU9T-large.png"
+  },
+  {
+    "id": 17,
+    "name": "ACM Series Centrifugal Monoblock Pump",
+    "category": "Monoblock Pump",
+    "price": 9500,
+    "stock": 50,
+    "description": "ACM Series Centrifugal Monoblock Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg"
+  },
+  {
+    "id": 18,
+    "name": "Mini Monoblock Pump",
+    "category": "Domestic Pump",
+    "price": 6000,
+    "stock": 90,
+    "description": "Mini Monoblock Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/DyIVu3VaZbRyZ-large.jpg"
+  },
+  {
+    "id": 19,
+    "name": "Regenerative Self Priming Monoset Pump",
+    "category": "Self Priming Pump",
+    "price": 8200,
+    "stock": 72,
+    "description": "Regenerative Self Priming Monoset Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/psvq6DLOzqttv-large.jpg"
+  },
+  {
+    "id": 20,
+    "name": "Centrifugal Jet Self Priming Pump",
+    "category": "Jet Pump",
+    "price": 9800,
+    "stock": 48,
+    "description": "Centrifugal Jet Self Priming Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/znMu7c7wuIjVC-large.jpg"
+  },
+  {
+    "id": 21,
+    "name": "Deepwell Centrifugal Jet Pump",
+    "category": "Jet Pump",
+    "price": 12000,
+    "stock": 55,
+    "description": "Deepwell Centrifugal Jet Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/7WiKsPkpDiVTI-large.jpg"
+  },
+  {
+    "id": 22,
+    "name": "I-Smart Pump",
+    "category": "Smart IoT Pump",
+    "price": 15500,
+    "stock": 22,
+    "description": "I-Smart Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/HvotdQutwswmH-large.png"
+  },
+  {
+    "id": 23,
+    "name": "Pressure Booster System",
+    "category": "Booster System",
+    "price": 35000,
+    "stock": 18,
+    "description": "Pressure Booster System is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/b5t0gJ8GEnbKj-large.jpg"
+  },
+  {
+    "id": 24,
+    "name": "Swimming Pool Pump",
+    "category": "Pool Pump",
+    "price": 28000,
+    "stock": 14,
+    "description": "Swimming Pool Pump is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/t17jVkK36RU9T-large.png"
+  },
+  {
+    "id": 25,
+    "name": "Solar Pumping System",
+    "category": "Solar System",
+    "price": 75000,
+    "stock": 8,
+    "description": "Solar Pumping System is a high-performance pump for various applications.",
+    "image": "https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg"
+  }
+]
