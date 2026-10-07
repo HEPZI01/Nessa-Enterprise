@@ -17,9 +17,22 @@ const Order = require('./models/Order');
 const SalesReport = require('./models/SalesReport');
 const { authenticateToken, authorizeRoles, JWT_SECRET } = require('./middleware/auth');
 
+const clientUrl = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+const isProduction = process.env.NODE_ENV === 'production';
+
+const allowedOrigins = isProduction && clientUrl
+  ? [clientUrl, 'http://localhost:5173']
+  : '*';
+
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -38,7 +51,10 @@ io.on('connection', (socket) => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: isProduction && clientUrl ? [clientUrl, 'http://localhost:5173'] : true,
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname))); // Serve static files
 

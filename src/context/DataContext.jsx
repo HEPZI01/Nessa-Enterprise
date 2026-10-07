@@ -129,10 +129,10 @@ export function DataProvider({ children }) {
   useEffect(() => {
     loadData();
 
-    // Socket.io for live updates
     let socket;
     try {
-      socket = io('http://localhost:3000');
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? window.location.origin : 'http://localhost:3000');
+      socket = io(socketUrl);
       socket.on('new_order', (msg) => {
         showToast(msg.message || 'New order received!', 'success');
         loadData();
