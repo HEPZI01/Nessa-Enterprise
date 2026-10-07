@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 
 const connectDB = require('./config/db');
@@ -13,6 +15,7 @@ const User = require('./models/User');
 const Product = require('./models/Product');
 const Order = require('./models/Order');
 const SalesReport = require('./models/SalesReport');
+const { authenticateToken, authorizeRoles, JWT_SECRET } = require('./middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
@@ -190,7 +193,7 @@ app.get('/api/v1/dashboard/stats', async (req, res) => {
   }
 });
 
-// Login User (Server-Side Authentication against MongoDB)
+// Login User (Server-Side Bcrypt & JWT Authentication against MongoDB)
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -201,9 +204,20 @@ app.post('/api/login', async (req, res) => {
     const cleanEmail = String(email).trim().toLowerCase();
     const user = await User.findOne({ email: cleanEmail });
 
-    if (!user || user.password !== String(password)) {
+    if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    const isMatch = await bcrypt.compare(String(password), user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id || user._id, email: user.email, role: user.role || 'Customer' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     return res.json({
       success: true,
@@ -212,7 +226,8 @@ app.post('/api/login', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role || 'Customer'
-      }
+      },
+      token
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -220,7 +235,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Register a User
+// Register a User (Bcrypt Password Hashing & JWT)
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -238,13 +253,21 @@ app.post('/api/register', async (req, res) => {
     const maxUser = await User.findOne().sort({ id: -1 });
     const nextId = (maxUser && maxUser.id ? maxUser.id : 0) + 1;
 
+    const hashedPassword = await bcrypt.hash(String(password), 10);
+
     const newUser = await User.create({
       id: nextId,
       name: String(name).trim(),
       email: cleanEmail,
-      password: String(password),
+      password: hashedPassword,
       role: 'Customer'
     });
+
+    const token = jwt.sign(
+      { id: newUser.id || newUser._id, email: newUser.email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     return res.json({
       success: true,
@@ -253,7 +276,8 @@ app.post('/api/register', async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role
-      }
+      },
+      token
     });
   } catch (err) {
     console.error('Registration error:', err);
@@ -261,8 +285,8 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Add a Product
-app.post('/api/products', async (req, res) => {
+// Add a Product (Requires Admin, Manager, or Staff role)
+app.post('/api/products', authenticateToken, authorizeRoles('Admin', 'Manager', 'Staff'), async (req, res) => {
   try {
     const newProductData = req.body;
     const maxProd = await Product.findOne().sort({ id: -1 });
@@ -279,8 +303,8 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-// Update a Product
-app.put('/api/products/:id', async (req, res) => {
+// Update a Product (Requires Admin, Manager, or Staff role)
+app.put('/api/products/:id', authenticateToken, authorizeRoles('Admin', 'Manager', 'Staff'), async (req, res) => {
   try {
     const filter = buildIdFilter(req.params.id);
     if (!filter) return res.status(400).json({ error: 'Invalid product ID' });
@@ -303,8 +327,8 @@ app.put('/api/products/:id', async (req, res) => {
   }
 });
 
-// Delete a Product
-app.delete('/api/products/:id', async (req, res) => {
+// Delete a Product (Requires Admin, Manager, or Staff role)
+app.delete('/api/products/:id', authenticateToken, authorizeRoles('Admin', 'Manager', 'Staff'), async (req, res) => {
   try {
     const filter = buildIdFilter(req.params.id);
     if (!filter) return res.status(400).json({ error: 'Invalid product ID' });
@@ -318,8 +342,8 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
-// Place an Order (With Strict Stock Validation)
-app.post('/api/orders', async (req, res) => {
+// Place an Order (Requires Authentication - Customer, Staff, Manager, or Admin)
+app.post('/api/orders', authenticateToken, async (req, res) => {
   try {
     const { userId, items, paymentMethod } = req.body;
 
@@ -363,9 +387,9 @@ app.post('/api/orders', async (req, res) => {
 
       await Order.create({
         id: maxOrderId,
-        userId: userId || (userDoc ? userDoc.id : 999),
-        customerName: userDoc ? userDoc.name : 'Customer',
-        customerEmail: userDoc ? userDoc.email : '',
+        userId: userId || (userDoc ? userDoc.id : (req.user?.id || 999)),
+        customerName: userDoc ? userDoc.name : (req.user?.email || 'Customer'),
+        customerEmail: userDoc ? userDoc.email : (req.user?.email || ''),
         productId: product.id,
         productName: product.name,
         quantity: quantity,
@@ -386,8 +410,8 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// Update Order Status (Admin)
-app.put('/api/orders/:id/status', async (req, res) => {
+// Update Order Status (Requires Admin, Manager, or Staff role)
+app.put('/api/orders/:id/status', authenticateToken, authorizeRoles('Admin', 'Manager', 'Staff'), async (req, res) => {
   try {
     const filter = buildIdFilter(req.params.id);
     if (!filter) return res.status(400).json({ error: 'Invalid order ID' });
@@ -410,14 +434,17 @@ app.put('/api/orders/:id/status', async (req, res) => {
   }
 });
 
-// Bulk Import to MongoDB Atlas (Excel import tool updates MongoDB as source of truth)
-app.post('/api/import', async (req, res) => {
+// Bulk Import to MongoDB Atlas (Requires Admin role)
+app.post('/api/import', authenticateToken, authorizeRoles('Admin'), async (req, res) => {
   try {
     const { users, products, orders, salesReports } = req.body;
 
     if (users && Array.isArray(users)) {
       for (let u of users) {
         if (u.email) {
+          if (u.password && (!u.password.startsWith('$2a$') && !u.password.startsWith('$2b$'))) {
+            u.password = await bcrypt.hash(u.password, 10);
+          }
           await User.updateOne({ email: u.email.toLowerCase() }, { $set: u }, { upsert: true });
         }
       }
@@ -458,5 +485,5 @@ app.post('/api/import', async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`✅ Backend server running at http://localhost:${PORT}`);
-  console.log(`   MongoDB Atlas Primary DB active. Socket.IO enabled.`);
+  console.log(`   MongoDB Atlas Primary DB active. Socket.IO & JWT Auth enabled.`);
 });

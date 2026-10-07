@@ -150,12 +150,28 @@ export function DataProvider({ children }) {
     };
   }, [loadData]);
 
+  const getAuthHeaders = () => {
+    try {
+      const raw = localStorage.getItem('nessa_jwt_token');
+      if (raw) {
+        const decoded = JSON.parse(raw);
+        if (decoded && decoded.token) {
+          return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${decoded.token}`
+          };
+        }
+      }
+    } catch (e) {}
+    return { 'Content-Type': 'application/json' };
+  };
+
   // CRUD Operations
   const addProduct = async (productData) => {
     try {
       const res = await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(productData)
       });
       if (res.ok) {
@@ -164,7 +180,7 @@ export function DataProvider({ children }) {
         return;
       } else {
         const json = await res.json();
-        showToast(json.error || 'Failed to add product', 'error');
+        showToast(json.error || json.message || 'Failed to add product', 'error');
         return;
       }
     } catch (e) {}
@@ -180,7 +196,7 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates)
       });
       if (res.ok) {
@@ -189,7 +205,7 @@ export function DataProvider({ children }) {
         return;
       } else {
         const json = await res.json();
-        showToast(json.error || 'Failed to update product', 'error');
+        showToast(json.error || json.message || 'Failed to update product', 'error');
         return;
       }
     } catch (e) {}
@@ -201,14 +217,17 @@ export function DataProvider({ children }) {
 
   const deleteProduct = async (id) => {
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         await loadData();
         showToast('Product deleted!', 'info');
         return;
       } else {
         const json = await res.json();
-        showToast(json.error || 'Failed to delete product', 'error');
+        showToast(json.error || json.message || 'Failed to delete product', 'error');
         return;
       }
     } catch (e) {}
@@ -223,7 +242,7 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ userId, items, paymentMethod })
       });
       if (res.ok) {
@@ -232,7 +251,7 @@ export function DataProvider({ children }) {
         return;
       } else {
         const json = await res.json();
-        showToast(json.error || 'Failed to place order', 'error');
+        showToast(json.error || json.message || 'Failed to place order', 'error');
         return;
       }
     } catch (e) {}
@@ -276,7 +295,7 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
@@ -285,7 +304,7 @@ export function DataProvider({ children }) {
         return;
       } else {
         const json = await res.json();
-        showToast(json.error || 'Failed to update order status', 'error');
+        showToast(json.error || json.message || 'Failed to update order status', 'error');
         return;
       }
     } catch (e) {}

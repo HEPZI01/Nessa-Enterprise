@@ -41,8 +41,9 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (email, password, usersData = []) => {
+  const login = async (email, password) => {
     let matchedUser = null;
+    let token = null;
 
     try {
       const res = await fetch('/api/login', {
@@ -54,20 +55,13 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         const json = await res.json();
         matchedUser = json.user;
+        token = json.token;
       } else {
         const json = await res.json();
         throw new Error(json.message || 'Invalid email or password');
       }
     } catch (err) {
-      if (err.message && err.message !== 'Failed to fetch') {
-        throw err;
-      }
-      // Fallback for offline mode or fallback admin override
-      if (email.toLowerCase() === 'admin@nessa.com' && password === 'admin123') {
-        matchedUser = { id: 1, name: 'Main Admin', email: 'admin@nessa.com', role: 'Admin' };
-      } else if (usersData.length > 0) {
-        matchedUser = usersData.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      }
+      if (err.message) throw err;
     }
 
     if (!matchedUser) {
@@ -78,7 +72,8 @@ export function AuthProvider({ children }) {
       id: matchedUser.id,
       name: matchedUser.name,
       email: matchedUser.email,
-      role: String(matchedUser.role || 'Customer').trim()
+      role: String(matchedUser.role || 'Customer').trim(),
+      token: token || null
     };
 
     const session = generateSession(sessionData);
@@ -92,7 +87,8 @@ export function AuthProvider({ children }) {
       id: newUser.id || Date.now(),
       name: newUser.name,
       email: newUser.email,
-      role: String(newUser.role || 'Customer').trim()
+      role: String(newUser.role || 'Customer').trim(),
+      token: newUser.token || null
     };
     const session = generateSession(sessionData);
     localStorage.setItem(SESSION_KEY, session);
@@ -106,7 +102,7 @@ export function AuthProvider({ children }) {
   };
 
   const role = (user?.role || '').toLowerCase();
-  const isManagement = role === 'admin' || role === 'manager' || role === 'staff' || user?.email === 'admin@nessa.com';
+  const isManagement = role === 'admin' || role === 'manager' || role === 'staff';
 
   return (
     <AuthContext.Provider
@@ -120,6 +116,7 @@ export function AuthProvider({ children }) {
         isLoggedIn: !!user,
         isManagement,
         role: user?.role || 'Customer',
+        token: user?.token || null,
         getRedirectPath: () => (isManagement ? '/dashboard' : '/store')
       }}
     >
