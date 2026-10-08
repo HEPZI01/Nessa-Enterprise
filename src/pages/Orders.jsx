@@ -80,17 +80,13 @@ export default function Orders() {
                   <td className="fw-bold">#{o.id}</td>
                   <td>
                     <div className="fw-semibold">{o.customerName || 'Customer'}</div>
-                    <div className="text-muted fs-8">{o.customerEmail || ''}</div>
-                    {o.deliveryPhone && (
-                      <div className="text-muted fs-8">
-                        <i className="bi bi-telephone me-1 text-primary"></i>{o.deliveryPhone}
-                      </div>
-                    )}
-                    {o.deliveryAddress && (
-                      <div className="text-muted fs-8 text-truncate" style={{ maxWidth: '180px' }} title={o.deliveryAddress}>
-                        <i className="bi bi-geo-alt me-1 text-danger"></i>{o.deliveryAddress}
-                      </div>
-                    )}
+                    <div className="text-muted fs-8">{o.customerEmail || 'N/A'}</div>
+                    <div className="text-muted fs-8">
+                      <i className="bi bi-telephone me-1 text-primary"></i>{o.deliveryPhone || 'N/A'}
+                    </div>
+                    <div className="text-muted fs-8 text-truncate" style={{ maxWidth: '180px' }} title={o.deliveryAddress || 'N/A'}>
+                      <i className="bi bi-geo-alt me-1 text-danger"></i>{o.deliveryAddress || 'N/A'}
+                    </div>
                   </td>
                   <td className="fw-medium">{o.productName || `Product #${o.productId}`}</td>
                   <td><span className="badge bg-light text-dark border">{o.quantity}</span></td>

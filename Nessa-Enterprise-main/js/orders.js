@@ -65,10 +65,10 @@ const Orders = (() => {
           <td><span class="fw-semibold">#${String(o.id).padStart(4, '0')}</span></td>
           <td>
             <div>
-              <div class="fw-semibold">${o.customerName}</div>
-              <div class="text-muted" style="font-size:12px;">${o.customerEmail || ''}</div>
-              ${o.deliveryPhone ? `<div class="text-muted" style="font-size:11px;"><i class="bi bi-telephone text-primary"></i> ${o.deliveryPhone}</div>` : ''}
-              ${o.deliveryAddress ? `<div class="text-muted text-truncate" style="font-size:11px;max-width:180px;" title="${o.deliveryAddress}"><i class="bi bi-geo-alt text-danger"></i> ${o.deliveryAddress}</div>` : ''}
+              <div class="fw-semibold">${o.customerName || 'Customer'}</div>
+              <div class="text-muted" style="font-size:12px;">${o.customerEmail || 'N/A'}</div>
+              <div class="text-muted" style="font-size:11px;"><i class="bi bi-telephone text-primary"></i> ${o.deliveryPhone || 'N/A'}</div>
+              <div class="text-muted text-truncate" style="font-size:11px;max-width:180px;" title="${o.deliveryAddress || 'N/A'}"><i class="bi bi-geo-alt text-danger"></i> ${o.deliveryAddress || 'N/A'}</div>
             </div>
           </td>
           <td>${o.productName.length > 22 ? o.productName.slice(0, 22) + '…' : o.productName}</td>

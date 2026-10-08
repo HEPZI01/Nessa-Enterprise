@@ -87,12 +87,12 @@ export default function Storefront() {
       errors.deliveryEmail = 'Please enter a valid email address';
     }
 
-    const phoneClean = deliveryPhone.trim().replace(/[\s-()]/g, '');
-    const phoneRegex = /^\+?\d{8,15}$/;
+    const phoneClean = deliveryPhone.trim().replace(/[\s\-()]/g, '');
+    const indianPhoneRegex = /^(?:(?:\+|00)?91|0)?[6-9]\d{9}$/;
     if (!deliveryPhone || !deliveryPhone.trim()) {
       errors.deliveryPhone = 'Phone Number is required';
-    } else if (!phoneRegex.test(phoneClean)) {
-      errors.deliveryPhone = 'Please enter a valid phone number (8-15 digits)';
+    } else if (!indianPhoneRegex.test(phoneClean)) {
+      errors.deliveryPhone = 'Please enter a valid 10-digit Indian phone number (e.g. 9876543210)';
     }
 
     if (!deliveryAddress || !deliveryAddress.trim()) {
@@ -250,9 +250,19 @@ export default function Storefront() {
             <div className="flex-grow-1 overflow-y-auto pr-2">
               {cart.map(item => (
                 <div key={item.id} className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 bg-light border">
-                  <div>
-                    <h6 className="fw-bold mb-1 fs-7">{item.name}</h6>
-                    <div className="text-primary fw-bold fs-7">₹{item.price.toLocaleString('en-IN')}</div>
+                  <div className="d-flex align-items-center gap-3">
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px' }}
+                        onError={(e) => { if (item.fallback) e.target.src = item.fallback; }}
+                      />
+                    )}
+                    <div>
+                      <h6 className="fw-bold mb-1 fs-7">{item.name}</h6>
+                      <div className="text-primary fw-bold fs-7">₹{item.price.toLocaleString('en-IN')}</div>
+                    </div>
                   </div>
                   <div className="d-flex align-items-center gap-2">
                     <button className="btn btn-sm btn-outline-secondary py-0 px-2" onClick={() => updateCartQty(item.id, -1)}>-</button>
@@ -300,41 +310,76 @@ export default function Storefront() {
         <>
           <div className="modal-backdrop-custom" onClick={() => setShowCheckoutModal(false)}></div>
           <div className="modal show d-block" style={{ zIndex: 1080 }}>
-            <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
               <div className="modal-content rounded-4 border-0 p-4">
-                <div className="modal-header border-0 pb-0">
-                  <h5 className="modal-header-title fw-bold">Complete Your Order</h5>
+                <div className="modal-header border-0 pb-2">
+                  <h5 className="modal-header-title fw-bold fs-4 text-primary">
+                    <i className="bi bi-bag-check-fill me-2"></i>Checkout
+                  </h5>
                   <button className="btn-close" onClick={() => setShowCheckoutModal(false)}></button>
                 </div>
-                <form onSubmit={handleCheckoutSubmit}>
-                  <div className="modal-body py-3">
-                    <div className="bg-light p-3 rounded-3 mb-3">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span>Items ({cartCount})</span>
-                        <span>₹{cartTotal.toLocaleString('en-IN')}</span>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1">
-                        <span>Delivery</span>
-                        <span className="text-success fw-bold">FREE</span>
-                      </div>
-                      <div className="d-flex justify-content-between border-top pt-2 fw-bold fs-5 text-primary">
-                        <span>Total</span>
-                        <span>₹{cartTotal.toLocaleString('en-IN')}</span>
+                <form onSubmit={handleCheckoutSubmit} noValidate>
+                  <div className="modal-body py-2">
+                    {/* 1. ORDER SUMMARY */}
+                    <div className="mb-4">
+                      <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                        <i className="bi bi-receipt me-2"></i>1. Order Summary
+                      </h6>
+                      <div className="bg-light p-3 rounded-3 border">
+                        <div className="mb-3" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                          {cart.map(item => (
+                            <div key={item.id} className="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom">
+                              <div className="d-flex align-items-center gap-3">
+                                {item.image && (
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px' }}
+                                    onError={(e) => { if (item.fallback) e.target.src = item.fallback; }}
+                                  />
+                                )}
+                                <div>
+                                  <div className="fw-bold fs-7">{item.name}</div>
+                                  <div className="text-muted fs-8">
+                                    Qty: {item.quantity} × ₹{item.price.toLocaleString('en-IN')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="fw-bold text-primary fs-7 ms-2">
+                                ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="pt-1">
+                          <div className="d-flex justify-content-between fs-7 mb-1">
+                            <span className="text-muted">Subtotal</span>
+                            <span className="fw-semibold">₹{cartTotal.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="d-flex justify-content-between fs-7 mb-1">
+                            <span className="text-muted">Delivery Charge</span>
+                            <span className="text-success fw-bold">FREE</span>
+                          </div>
+                          <div className="d-flex justify-content-between border-top pt-2 fw-bold fs-5 text-primary">
+                            <span>Grand Total</span>
+                            <span>₹{cartTotal.toLocaleString('en-IN')}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Delivery Information Form */}
-                    <div className="mb-3">
-                      <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary fs-7">
-                        <i className="bi bi-geo-alt-fill me-1"></i>Delivery Information
+                    {/* 2. DELIVERY INFORMATION */}
+                    <div className="mb-4">
+                      <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                        <i className="bi bi-geo-alt-fill me-2"></i>2. Delivery Information
                       </h6>
 
-                      <div className="row g-2">
-                        <div className="col-12 col-md-6 mb-2">
-                          <label className="form-label fw-semibold fs-8 mb-1">Full Name <span className="text-danger">*</span></label>
+                      <div className="row g-3">
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-semibold fs-7 mb-1">Full Name <span className="text-danger">*</span></label>
                           <input
                             type="text"
-                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryName ? 'is-invalid' : ''}`}
+                            className={`form-control rounded-3 ${formErrors.deliveryName ? 'is-invalid' : ''}`}
                             placeholder="Full Name"
                             value={deliveryName}
                             onChange={(e) => {
@@ -346,11 +391,11 @@ export default function Storefront() {
                           {formErrors.deliveryName && <div className="invalid-feedback fs-8">{formErrors.deliveryName}</div>}
                         </div>
 
-                        <div className="col-12 col-md-6 mb-2">
-                          <label className="form-label fw-semibold fs-8 mb-1">Email Address <span className="text-danger">*</span></label>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-semibold fs-7 mb-1">Email Address <span className="text-danger">*</span></label>
                           <input
                             type="email"
-                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryEmail ? 'is-invalid' : ''}`}
+                            className={`form-control rounded-3 ${formErrors.deliveryEmail ? 'is-invalid' : ''}`}
                             placeholder="name@domain.com"
                             value={deliveryEmail}
                             onChange={(e) => {
@@ -362,12 +407,12 @@ export default function Storefront() {
                           {formErrors.deliveryEmail && <div className="invalid-feedback fs-8">{formErrors.deliveryEmail}</div>}
                         </div>
 
-                        <div className="col-12 mb-2">
-                          <label className="form-label fw-semibold fs-8 mb-1">Phone Number <span className="text-danger">*</span></label>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-semibold fs-7 mb-1">Phone Number <span className="text-danger">*</span></label>
                           <input
                             type="tel"
-                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryPhone ? 'is-invalid' : ''}`}
-                            placeholder="Phone Number (e.g. 9876543210)"
+                            className={`form-control rounded-3 ${formErrors.deliveryPhone ? 'is-invalid' : ''}`}
+                            placeholder="10-digit Mobile Number (e.g. 9876543210)"
                             value={deliveryPhone}
                             onChange={(e) => {
                               setDeliveryPhone(e.target.value);
@@ -378,12 +423,12 @@ export default function Storefront() {
                           {formErrors.deliveryPhone && <div className="invalid-feedback fs-8">{formErrors.deliveryPhone}</div>}
                         </div>
 
-                        <div className="col-12 mb-2">
-                          <label className="form-label fw-semibold fs-8 mb-1">Delivery Address <span className="text-danger">*</span></label>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-semibold fs-7 mb-1">Delivery Address <span className="text-danger">*</span></label>
                           <textarea
-                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryAddress ? 'is-invalid' : ''}`}
+                            className={`form-control rounded-3 ${formErrors.deliveryAddress ? 'is-invalid' : ''}`}
                             rows="2"
-                            placeholder="Complete street address, area, city, pincode"
+                            placeholder="Complete street address, house no., city, pincode"
                             value={deliveryAddress}
                             onChange={(e) => {
                               setDeliveryAddress(e.target.value);
@@ -396,20 +441,22 @@ export default function Storefront() {
                       </div>
                     </div>
 
+                    {/* 3. PAYMENT METHOD */}
                     <div className="mb-3">
-                      <label className="form-label fw-semibold fs-7">Payment Method</label>
-                      <div className="d-flex flex-column gap-2">
-                        <label className={`p-3 border rounded-3 d-flex align-items-center justify-content-between ${paymentMethod === 'COD' ? 'border-primary bg-primary-subtle' : ''}`} style={{ cursor: 'pointer' }}>
-                          <div className="d-flex align-items-center gap-2">
-                            <input type="radio" name="payment" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} />
-                            <span>Cash on Delivery (COD)</span>
-                          </div>
-                          <i className="bi bi-cash-stack text-success fs-5"></i>
-                        </label>
+                      <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                        <i className="bi bi-credit-card-fill me-2"></i>3. Payment Method
+                      </h6>
+                      <div className="p-3 border rounded-3 d-flex align-items-center justify-content-between bg-primary-subtle border-primary">
+                        <div className="d-flex align-items-center gap-2">
+                          <input type="radio" name="payment" checked={paymentMethod === 'COD'} readOnly />
+                          <span className="fw-semibold">Cash on Delivery (COD)</span>
+                        </div>
+                        <i className="bi bi-cash-stack text-success fs-5"></i>
                       </div>
                     </div>
                   </div>
 
+                  {/* 4. CONFIRM ORDER */}
                   <div className="modal-footer border-0 pt-0">
                     <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => setShowCheckoutModal(false)}>Cancel</button>
                     <button type="submit" className="btn btn-primary rounded-pill px-4 fw-bold" disabled={placingOrder}>
