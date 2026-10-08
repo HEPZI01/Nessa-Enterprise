@@ -71,50 +71,50 @@ const Auth = (() => {
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Authenticating...';
 
     try {
-      await ExcelService.loadData(true);
-      const users = ExcelService.getUsers();
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
 
-      // Simulated network delay
-      await new Promise(r => setTimeout(r, 600));
+      const json = await response.json().catch(() => ({}));
 
-      let user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-
-      // FORCED ADMIN OVERRIDE - Highest Priority for admin@nessa.com
-      if (email === 'admin@nessa.com' && password === 'admin123') {
-        user = { id: 1, name: 'Main Admin', email: 'admin@nessa.com', role: 'Admin' };
-      }
-
-      if (user) {
-        const portalType = document.getElementById('portalTypeInput')?.value || 'customer';
-        const uRole = String(user.role || 'Customer').toLowerCase();
-        const isMgmt = uRole === 'admin' || uRole === 'manager' || uRole === 'staff' || user.email === 'admin@nessa.com';
-
-        if (portalType === 'admin' && !isMgmt) {
-          errorBox.classList.add('show');
-          errorBox.innerHTML = '<i class="bi bi-exclamation-circle"></i> Access Denied: Customer accounts cannot log in via Admin Portal.';
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Sign In to Admin Panel';
-          return;
-        }
-
-        const session = generateSession({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: String(user.role || 'Customer').trim()
-        });
-        
-        localStorage.setItem(SESSION_KEY, session);
-        redirectByRole();
-      } else {
+      if (!response.ok || !json.user || !json.token) {
         errorBox.classList.add('show');
-        errorBox.innerHTML = '<i class="bi bi-exclamation-circle"></i> Incorrect email or password.';
+        errorBox.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${json.error || json.message || 'Incorrect email or password.'}`;
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Sign In';
+        return;
       }
+
+      const user = json.user;
+      const token = json.token;
+
+      const portalType = document.getElementById('portalTypeInput')?.value || 'customer';
+      const uRole = String(user.role || 'Customer').toLowerCase();
+      const isMgmt = uRole === 'admin' || uRole === 'manager' || uRole === 'staff' || user.email === 'admin@nessa.com';
+
+      if (portalType === 'admin' && !isMgmt) {
+        errorBox.classList.add('show');
+        errorBox.innerHTML = '<i class="bi bi-exclamation-circle"></i> Access Denied: Customer accounts cannot log in via Admin Portal.';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign In to Admin Panel';
+        return;
+      }
+
+      const session = generateSession({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: String(user.role || 'Customer').trim(),
+        token: token
+      });
+      
+      localStorage.setItem(SESSION_KEY, session);
+      redirectByRole();
     } catch (err) {
       errorBox.classList.add('show');
-      errorBox.innerHTML = '<i class="bi bi-exclamation-circle"></i> Service unavailable.';
+      errorBox.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${err.message || 'Service unavailable.'}`;
       submitBtn.disabled = false;
       submitBtn.innerHTML = 'Sign In';
     }
@@ -134,12 +134,14 @@ const Auth = (() => {
     try {
       const response = await ExcelService.registerUser({ name, email, password });
       const user = response.user;
+      const token = response.token;
       
       const session = generateSession({
         id: user.id,
         name: user.name,
         email: user.email,
-        role: String(user.role || 'Customer').trim()
+        role: String(user.role || 'Customer').trim(),
+        token: token || null
       });
       
       localStorage.setItem(SESSION_KEY, session);
