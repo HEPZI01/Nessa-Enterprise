@@ -67,6 +67,8 @@ const Orders = (() => {
             <div>
               <div class="fw-semibold">${o.customerName}</div>
               <div class="text-muted" style="font-size:12px;">${o.customerEmail || ''}</div>
+              ${o.deliveryPhone ? `<div class="text-muted" style="font-size:11px;"><i class="bi bi-telephone text-primary"></i> ${o.deliveryPhone}</div>` : ''}
+              ${o.deliveryAddress ? `<div class="text-muted text-truncate" style="font-size:11px;max-width:180px;" title="${o.deliveryAddress}"><i class="bi bi-geo-alt text-danger"></i> ${o.deliveryAddress}</div>` : ''}
             </div>
           </td>
           <td>${o.productName.length > 22 ? o.productName.slice(0, 22) + '…' : o.productName}</td>

@@ -238,12 +238,23 @@ export function DataProvider({ children }) {
   };
 
   const placeOrder = async (orderPayload) => {
-    const { userId, userEmail, userName, items, paymentMethod } = orderPayload;
+    const { userId, userEmail, userName, customerName, customerEmail, deliveryPhone, deliveryAddress, items, paymentMethod } = orderPayload;
+    const finalName = customerName || userName || 'Customer';
+    const finalEmail = customerEmail || userEmail || '';
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ userId, items, paymentMethod })
+        body: JSON.stringify({
+          userId,
+          customerName: finalName,
+          customerEmail: finalEmail,
+          deliveryPhone,
+          deliveryAddress,
+          items,
+          paymentMethod
+        })
       });
       if (res.ok) {
         await loadData();
@@ -271,8 +282,10 @@ export function DataProvider({ children }) {
       newOrders.push({
         id: maxId,
         userId: userId || 999,
-        customerName: userName || 'Customer',
-        customerEmail: userEmail || 'customer@nessa.com',
+        customerName: finalName,
+        customerEmail: finalEmail,
+        deliveryPhone: deliveryPhone || '',
+        deliveryAddress: deliveryAddress || '',
         productId: item.productId,
         productName: prod ? prod.name : 'Unknown Product',
         quantity: item.quantity,

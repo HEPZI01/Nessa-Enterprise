@@ -24,6 +24,20 @@ export default function Storefront() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [placingOrder, setPlacingOrder] = useState(false);
 
+  // Delivery Form State & Validation
+  const [deliveryName, setDeliveryName] = useState(user?.name || '');
+  const [deliveryEmail, setDeliveryEmail] = useState(user?.email || '');
+  const [deliveryPhone, setDeliveryPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [formErrors, setFormErrors] = useState({});
+
+  React.useEffect(() => {
+    if (user) {
+      if (!deliveryName) setDeliveryName(user.name || '');
+      if (!deliveryEmail) setDeliveryEmail(user.email || '');
+    }
+  }, [user]);
+
   const categories = ['All', 'Submersible Pump', 'Openwell Pump', 'Monoblock Pump', 'Domestic Pump', 'Self Priming Pump', 'Smart IoT Pump', 'Booster System', 'Solar System'];
 
   const filteredProducts = products.filter(p => {
@@ -61,12 +75,43 @@ export default function Storefront() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const validateForm = () => {
+    const errors = {};
+    if (!deliveryName || !deliveryName.trim()) {
+      errors.deliveryName = 'Full Name is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!deliveryEmail || !deliveryEmail.trim()) {
+      errors.deliveryEmail = 'Email Address is required';
+    } else if (!emailRegex.test(deliveryEmail.trim())) {
+      errors.deliveryEmail = 'Please enter a valid email address';
+    }
+
+    const phoneClean = deliveryPhone.trim().replace(/[\s-()]/g, '');
+    const phoneRegex = /^\+?\d{8,15}$/;
+    if (!deliveryPhone || !deliveryPhone.trim()) {
+      errors.deliveryPhone = 'Phone Number is required';
+    } else if (!phoneRegex.test(phoneClean)) {
+      errors.deliveryPhone = 'Please enter a valid phone number (8-15 digits)';
+    }
+
+    if (!deliveryAddress || !deliveryAddress.trim()) {
+      errors.deliveryAddress = 'Delivery Address is required';
+    } else if (deliveryAddress.trim().length < 5) {
+      errors.deliveryAddress = 'Please enter a complete delivery address';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
       navigate('/login');
       return;
     }
+    if (!validateForm()) return;
     if (cart.length === 0) return;
 
     setPlacingOrder(true);
@@ -78,8 +123,10 @@ export default function Storefront() {
 
     await placeOrder({
       userId: user?.id,
-      userName: user?.name,
-      userEmail: user?.email,
+      customerName: deliveryName.trim(),
+      customerEmail: deliveryEmail.trim(),
+      deliveryPhone: deliveryPhone.trim(),
+      deliveryAddress: deliveryAddress.trim(),
       items: orderItems,
       paymentMethod
     });
@@ -273,6 +320,79 @@ export default function Storefront() {
                       <div className="d-flex justify-content-between border-top pt-2 fw-bold fs-5 text-primary">
                         <span>Total</span>
                         <span>₹{cartTotal.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+
+                    {/* Delivery Information Form */}
+                    <div className="mb-3">
+                      <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary fs-7">
+                        <i className="bi bi-geo-alt-fill me-1"></i>Delivery Information
+                      </h6>
+
+                      <div className="row g-2">
+                        <div className="col-12 col-md-6 mb-2">
+                          <label className="form-label fw-semibold fs-8 mb-1">Full Name <span className="text-danger">*</span></label>
+                          <input
+                            type="text"
+                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryName ? 'is-invalid' : ''}`}
+                            placeholder="Full Name"
+                            value={deliveryName}
+                            onChange={(e) => {
+                              setDeliveryName(e.target.value);
+                              if (formErrors.deliveryName) setFormErrors(prev => ({ ...prev, deliveryName: null }));
+                            }}
+                            required
+                          />
+                          {formErrors.deliveryName && <div className="invalid-feedback fs-8">{formErrors.deliveryName}</div>}
+                        </div>
+
+                        <div className="col-12 col-md-6 mb-2">
+                          <label className="form-label fw-semibold fs-8 mb-1">Email Address <span className="text-danger">*</span></label>
+                          <input
+                            type="email"
+                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryEmail ? 'is-invalid' : ''}`}
+                            placeholder="name@domain.com"
+                            value={deliveryEmail}
+                            onChange={(e) => {
+                              setDeliveryEmail(e.target.value);
+                              if (formErrors.deliveryEmail) setFormErrors(prev => ({ ...prev, deliveryEmail: null }));
+                            }}
+                            required
+                          />
+                          {formErrors.deliveryEmail && <div className="invalid-feedback fs-8">{formErrors.deliveryEmail}</div>}
+                        </div>
+
+                        <div className="col-12 mb-2">
+                          <label className="form-label fw-semibold fs-8 mb-1">Phone Number <span className="text-danger">*</span></label>
+                          <input
+                            type="tel"
+                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryPhone ? 'is-invalid' : ''}`}
+                            placeholder="Phone Number (e.g. 9876543210)"
+                            value={deliveryPhone}
+                            onChange={(e) => {
+                              setDeliveryPhone(e.target.value);
+                              if (formErrors.deliveryPhone) setFormErrors(prev => ({ ...prev, deliveryPhone: null }));
+                            }}
+                            required
+                          />
+                          {formErrors.deliveryPhone && <div className="invalid-feedback fs-8">{formErrors.deliveryPhone}</div>}
+                        </div>
+
+                        <div className="col-12 mb-2">
+                          <label className="form-label fw-semibold fs-8 mb-1">Delivery Address <span className="text-danger">*</span></label>
+                          <textarea
+                            className={`form-control form-control-sm rounded-3 ${formErrors.deliveryAddress ? 'is-invalid' : ''}`}
+                            rows="2"
+                            placeholder="Complete street address, area, city, pincode"
+                            value={deliveryAddress}
+                            onChange={(e) => {
+                              setDeliveryAddress(e.target.value);
+                              if (formErrors.deliveryAddress) setFormErrors(prev => ({ ...prev, deliveryAddress: null }));
+                            }}
+                            required
+                          ></textarea>
+                          {formErrors.deliveryAddress && <div className="invalid-feedback fs-8">{formErrors.deliveryAddress}</div>}
+                        </div>
                       </div>
                     </div>
 

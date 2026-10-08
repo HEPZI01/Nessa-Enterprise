@@ -361,10 +361,18 @@ app.delete('/api/products/:id', authenticateToken, authorizeRoles('Admin', 'Mana
 // Place an Order (Requires Authentication - Customer, Staff, Manager, or Admin)
 app.post('/api/orders', authenticateToken, async (req, res) => {
   try {
-    const { userId, items, paymentMethod } = req.body;
+    const { userId, items, paymentMethod, customerName, customerEmail, deliveryPhone, deliveryAddress } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Order must contain items' });
+    }
+
+    if (!deliveryPhone || !String(deliveryPhone).trim()) {
+      return res.status(400).json({ error: 'Delivery phone number is required' });
+    }
+
+    if (!deliveryAddress || !String(deliveryAddress).trim()) {
+      return res.status(400).json({ error: 'Delivery address is required' });
     }
 
     // Step 12 Requirement: Validate stock availability FIRST before deducting or creating orders
@@ -404,8 +412,10 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       await Order.create({
         id: maxOrderId,
         userId: userId || (userDoc ? userDoc.id : (req.user?.id || 999)),
-        customerName: userDoc ? userDoc.name : (req.user?.email || 'Customer'),
-        customerEmail: userDoc ? userDoc.email : (req.user?.email || ''),
+        customerName: (customerName && String(customerName).trim()) || (userDoc ? userDoc.name : (req.user?.name || 'Customer')),
+        customerEmail: (customerEmail && String(customerEmail).trim()) || (userDoc ? userDoc.email : (req.user?.email || '')),
+        deliveryPhone: String(deliveryPhone).trim(),
+        deliveryAddress: String(deliveryAddress).trim(),
         productId: product.id,
         productName: product.name,
         quantity: quantity,
