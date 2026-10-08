@@ -275,6 +275,128 @@
     </div>
   </div>
 
+  <!-- Checkout Modal -->
+  <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 p-4">
+        <div class="modal-header border-0 pb-2">
+          <h5 class="modal-title fw-bold fs-4 text-primary">
+            <i class="bi bi-bag-check-fill me-2"></i>Checkout
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="legacyCheckoutForm" onsubmit="Store.handleCheckoutSubmit(event)" novalidate>
+          <div class="modal-body py-2">
+            <!-- 1. ORDER SUMMARY -->
+            <div class="mb-4">
+              <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                <i class="bi bi-receipt me-2"></i>1. Order Summary
+              </h6>
+              <div class="bg-light p-3 rounded-3 border">
+                <div id="checkoutSummaryItems" className="mb-3" style="max-height: 200px; overflow-y: auto;">
+                  <!-- Dynamic summary items -->
+                </div>
+                <div className="pt-2 border-top">
+                  <div class="d-flex justify-content-between fs-7 mb-1">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="fw-semibold" id="checkoutSubtotal">₹0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between fs-7 mb-1">
+                    <span class="text-muted">Delivery Charge</span>
+                    <span class="text-success fw-bold">FREE</span>
+                  </div>
+                  <div class="d-flex justify-content-between pt-2 fw-bold fs-5 text-primary border-top">
+                    <span>Grand Total</span>
+                    <span id="checkoutGrandTotal">₹0.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. DELIVERY INFORMATION -->
+            <div class="mb-4">
+              <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                <i class="bi bi-geo-alt-fill me-2"></i>2. Delivery Information
+              </h6>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold fs-7 mb-1">Full Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    id="checkoutFullName"
+                    class="form-control rounded-3"
+                    placeholder="Full Name"
+                    required
+                  />
+                  <div class="invalid-feedback fs-8">Full Name is required</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold fs-7 mb-1">Email Address <span class="text-danger">*</span></label>
+                  <input
+                    type="email"
+                    id="checkoutEmail"
+                    class="form-control rounded-3"
+                    placeholder="name@domain.com"
+                    required
+                  />
+                  <div class="invalid-feedback fs-8">Please enter a valid email address</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold fs-7 mb-1">Phone Number <span class="text-danger">*</span></label>
+                  <input
+                    type="tel"
+                    id="checkoutPhone"
+                    class="form-control rounded-3"
+                    placeholder="10-digit Mobile Number (e.g. 9876543210)"
+                    required
+                  />
+                  <div class="invalid-feedback fs-8">Please enter a valid 10-digit Indian phone number</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold fs-7 mb-1">Delivery Address <span class="text-danger">*</span></label>
+                  <textarea
+                    id="checkoutAddress"
+                    class="form-control rounded-3"
+                    rows="2"
+                    placeholder="Complete street address, house no., city, pincode"
+                    required
+                  ></textarea>
+                  <div class="invalid-feedback fs-8">Please enter a complete delivery address</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. PAYMENT METHOD -->
+            <div class="mb-3">
+              <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary fs-6">
+                <i class="bi bi-credit-card-fill me-2"></i>3. Payment Method
+              </h6>
+              <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between bg-primary-subtle border-primary">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="radio" name="checkoutPayment" value="COD" checked readOnly />
+                  <span class="fw-semibold">Cash on Delivery (COD)</span>
+                </div>
+                <i class="bi bi-cash-stack text-success fs-5"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. CONFIRM ORDER -->
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="confirmOrderSubmitBtn" class="btn btn-primary rounded-pill px-4 fw-bold">
+              Confirm Order
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Buy Now Modal -->
   <div class="modal fade" id="buyNowModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -287,18 +409,7 @@
           <div id="buyNowProduct" class="mb-4">
             <!-- Dynamic product info -->
           </div>
-          <div class="mb-4">
-            <label class="fw-semibold mb-3 d-block" style="font-size:14px;">Select Payment Method</label>
-            <div class="d-flex gap-2">
-              <label class="payment-option flex-grow-1" style="cursor:pointer;">
-                <input type="radio" name="buyNowPayment" value="COD" checked style="display:none;">
-                <div class="p-3 text-center rounded-3 border-2" style="border:2px solid var(--border-color); font-weight:600; font-size:13px;">
-                  <i class="bi bi-cash-stack d-block mb-1" style="font-size:18px;"></i> COD
-                </div>
-              </label>
-            </div>
-          </div>
-          <button class="btn btn-nessa-primary w-100 py-3 fw-bold" id="confirmBuyNowBtn">Place Order Now</button>
+          <button class="btn btn-nessa-primary w-100 py-3 fw-bold" id="confirmBuyNowBtn">Proceed to Checkout</button>
         </div>
       </div>
     </div>
@@ -341,23 +452,6 @@
         document.getElementById('mobileSearchInput').addEventListener('input', e => { searchQ = e.target.value.toLowerCase(); filterProducts(); });
 
         document.querySelectorAll('.logout-link').forEach(el => el.addEventListener('click', Auth.logout));
-
-        // Payment method toggle styling
-        document.querySelectorAll('.payment-option input').forEach(radio => {
-          radio.addEventListener('change', () => {
-            document.querySelectorAll('.payment-option div').forEach(d => {
-              d.style.borderColor = 'var(--border-color)';
-              d.style.background = 'transparent';
-              d.style.color = 'var(--text-primary)';
-            });
-            const activeDiv = radio.closest('.payment-option').querySelector('div');
-            activeDiv.style.borderColor = 'var(--primary-600)';
-            activeDiv.style.background = 'var(--primary-50)';
-            activeDiv.style.color = 'var(--primary-600)';
-          });
-          // Set initial active styling for checked
-          if(radio.checked) radio.dispatchEvent(new Event('change'));
-        });
       }
 
       function loadCart() {
@@ -436,7 +530,7 @@
         const p = products.find(prod => prod.id === id);
         if(!p) return;
 
-        document.getElementById('modalImg').src = isImageUrl(p.image) ? p.image : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop';
+        document.getElementById('modalImg').src = isImageUrl(p.image) ? p.image : (p.fallback || 'https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg');
         document.getElementById('modalCat').textContent = p.category;
         document.getElementById('modalTitle').textContent = p.name;
         document.getElementById('modalPrice').textContent = '₹' + p.price.toLocaleString('en-IN');
@@ -475,7 +569,7 @@
         container.innerHTML = `
           <div class="d-flex gap-3 align-items-center p-3 rounded-4" style="background:var(--input-bg);">
             <div style="width:70px; height:70px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color);">
-              <img src="${isImageUrl(p.image) ? p.image : ''}" style="width:100%; height:100%; object-fit:cover;">
+              <img src="${p.image || p.fallback}" onError="this.src='${p.fallback}'" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div>
               <div class="fw-bold" style="font-size:15px;">${p.name}</div>
@@ -487,39 +581,10 @@
         const modal = new bootstrap.Modal(document.getElementById('buyNowModal'));
         modal.show();
 
-        document.getElementById('confirmBuyNowBtn').onclick = async () => {
-          const btn = document.getElementById('confirmBuyNowBtn');
-          const pm = document.querySelector('input[name="buyNowPayment"]:checked').value;
-          
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
-          btn.disabled = true;
-
-          try {
-            const session = Auth.getSession();
-            await ExcelService.placeOrder({ 
-              userId: session.id, 
-              items: [{ productId: p.id, quantity: 1, total: p.price }], 
-              paymentMethod: pm 
-            });
-            
-            modal.hide();
-            
-            // Show Success with custom details
-            document.getElementById('successOrderNumber').textContent = 'ORDER #ORD-' + new Date().toISOString().substring(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
-            document.getElementById('successItemCount').textContent = '1 Items';
-            document.getElementById('successPaymentMethod').textContent = pm;
-            document.getElementById('successTotalAmount').textContent = '₹' + p.price.toLocaleString('en-IN');
-            document.getElementById('orderSuccessOverlay').classList.add('active');
-            triggerConfetti();
-            
-            await ExcelService.loadData(true);
-            products = ExcelService.getProducts();
-            filterProducts();
-          } catch(err) {
-            showToast('Error: ' + err.message, 'error');
-            btn.innerHTML = 'Place Order Now';
-            btn.disabled = false;
-          }
+        document.getElementById('confirmBuyNowBtn').onclick = () => {
+          modal.hide();
+          addToCart(p.id);
+          checkout();
         };
       }
 
@@ -561,11 +626,12 @@
           total += lineTotal;
 
           const safeName = prod.name ? prod.name.replace(/"/g, '&quot;') : 'Product';
+          const imgSrc = prod.image || prod.fallback || 'https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg';
           html += `
           <div class="cart-item">
             <div class="cart-item-img">
-              <img src="${prod.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop'}" 
-                   onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop'"
+              <img src="${imgSrc}" 
+                   onerror="this.src='${prod.fallback || 'https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg'}'"
                    alt="${safeName}">
             </div>
             <div class="cart-item-info">
@@ -606,11 +672,123 @@
         renderProducts();
       }
 
-      async function checkout() {
+      function populateCheckoutSummary() {
+        const container = document.getElementById('checkoutSummaryItems');
+        if (!container) return;
+
+        let total = 0;
+        let html = '';
+
+        cart.forEach(item => {
+          const prod = products.find(p => p.id === item.productId);
+          if (!prod) return;
+          const lineTotal = prod.price * item.qty;
+          total += lineTotal;
+
+          const imgSrc = prod.image || prod.fallback || 'https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg';
+          html += `
+            <div class="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom">
+              <div class="d-flex align-items-center gap-3">
+                <img src="${imgSrc}" onError="this.src='${prod.fallback || 'https://cdn.moglix.com/p/Oi6uSoVCV1xCj-large.jpg'}'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" alt="${prod.name}">
+                <div>
+                  <div class="fw-bold fs-7">${prod.name}</div>
+                  <div class="text-muted fs-8">Qty: ${item.qty} × ₹${prod.price.toLocaleString('en-IN')}</div>
+                </div>
+              </div>
+              <div class="fw-bold text-primary fs-7 ms-2">₹${lineTotal.toLocaleString('en-IN')}</div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        document.getElementById('checkoutSubtotal').textContent = '₹' + total.toLocaleString('en-IN');
+        document.getElementById('checkoutGrandTotal').textContent = '₹' + total.toLocaleString('en-IN');
+      }
+
+      function checkout() {
         if(cart.length === 0) return;
-        const btn = document.getElementById('checkoutBtn');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-        btn.disabled = true;
+
+        // Pre-fill session name & email if available
+        const session = Auth.getSession();
+        const nameEl = document.getElementById('checkoutFullName');
+        const emailEl = document.getElementById('checkoutEmail');
+        const phoneEl = document.getElementById('checkoutPhone');
+        const addressEl = document.getElementById('checkoutAddress');
+
+        if (nameEl && !nameEl.value.trim()) nameEl.value = session?.name || '';
+        if (emailEl && !emailEl.value.trim()) emailEl.value = session?.email || '';
+
+        // Clear previous errors
+        [nameEl, emailEl, phoneEl, addressEl].forEach(el => {
+          if (el) el.classList.remove('is-invalid');
+        });
+
+        // Populate Order Summary
+        populateCheckoutSummary();
+
+        // Close cart sidebar
+        const offcanvasEl = document.getElementById('cartOffcanvas');
+        if (offcanvasEl) {
+          const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+          if (offcanvas) offcanvas.hide();
+        }
+
+        // Open Checkout Modal
+        const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+        checkoutModal.show();
+      }
+
+      async function handleCheckoutSubmit(e) {
+        e.preventDefault();
+
+        const nameEl = document.getElementById('checkoutFullName');
+        const emailEl = document.getElementById('checkoutEmail');
+        const phoneEl = document.getElementById('checkoutPhone');
+        const addressEl = document.getElementById('checkoutAddress');
+        const submitBtn = document.getElementById('confirmOrderSubmitBtn');
+
+        const fullName = nameEl ? nameEl.value.trim() : '';
+        const email = emailEl ? emailEl.value.trim() : '';
+        const phone = phoneEl ? phoneEl.value.trim() : '';
+        const address = addressEl ? addressEl.value.trim() : '';
+
+        let isValid = true;
+
+        if (!fullName) {
+          if (nameEl) nameEl.classList.add('is-invalid');
+          isValid = false;
+        } else {
+          if (nameEl) nameEl.classList.remove('is-invalid');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          if (emailEl) emailEl.classList.add('is-invalid');
+          isValid = false;
+        } else {
+          if (emailEl) emailEl.classList.remove('is-invalid');
+        }
+
+        const phoneClean = phone.replace(/[\s\-()]/g, '');
+        const indianPhoneRegex = /^(?:(?:\+|00)?91|0)?[6-9]\d{9}$/;
+        if (!phone || !indianPhoneRegex.test(phoneClean)) {
+          if (phoneEl) phoneEl.classList.add('is-invalid');
+          isValid = false;
+        } else {
+          if (phoneEl) phoneEl.classList.remove('is-invalid');
+        }
+
+        if (!address || address.length < 5) {
+          if (addressEl) addressEl.classList.add('is-invalid');
+          isValid = false;
+        } else {
+          if (addressEl) addressEl.classList.remove('is-invalid');
+        }
+
+        if (!isValid) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
 
         try {
           const session = Auth.getSession();
@@ -623,44 +801,46 @@
             };
           });
 
-          const pmLabel = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
-          
-          // Store totals before clearing cart
           const totalTemp = cart.reduce((sum, item) => {
             const p = products.find(prod => prod.id === item.productId);
             return sum + (p.price * item.qty);
           }, 0).toFixed(2);
           const itemsTemp = cart.reduce((s, i) => s + i.qty, 0);
 
-          await ExcelService.placeOrder({ userId: session.id, items: itemsToOrder, paymentMethod: pmLabel });
-          
+          await ExcelService.placeOrder({
+            userId: session?.id || 999,
+            customerName: fullName,
+            customerEmail: email,
+            deliveryPhone: phone,
+            deliveryAddress: address,
+            items: itemsToOrder,
+            paymentMethod: 'COD'
+          });
+
           cart = [];
           saveCart();
-          
-          // Close cart sidebar
-          const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
-          if (offcanvas) offcanvas.hide();
 
-          // Show success overlay with details
-          const pmFinal = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
-          
+          const modalEl = document.getElementById('checkoutModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+
           document.getElementById('successOrderNumber').textContent = 'ORDER #ORD-' + new Date().toISOString().substring(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
           document.getElementById('successItemCount').textContent = itemsTemp + ' Items';
-          document.getElementById('successPaymentMethod').textContent = pmFinal;
-          document.getElementById('successTotalAmount').textContent = '₹' + totalTemp;
-          
+          document.getElementById('successPaymentMethod').textContent = 'COD';
+          document.getElementById('successTotalAmount').textContent = '₹' + parseFloat(totalTemp).toLocaleString('en-IN');
+
           document.getElementById('orderSuccessOverlay').classList.add('active');
           triggerConfetti();
-          
-          // Re-load to reflect new stock
+
           await ExcelService.loadData(true);
           products = ExcelService.getProducts();
           filterProducts();
 
         } catch (err) {
           showToast('Error placing order: ' + err.message, 'error');
-          btn.innerHTML = 'Checkout Now';
-          btn.disabled = false;
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Confirm Order';
         }
       }
 
@@ -690,7 +870,7 @@
         }
       }
 
-      return { init, setCategory, addToCart, updateQty, checkout, closeSuccessOverlay, showProductDetails };
+      return { init, setCategory, addToCart, updateQty, checkout, handleCheckoutSubmit, closeSuccessOverlay, showProductDetails };
     })();
 
     document.addEventListener('DOMContentLoaded', Store.init);

@@ -116,7 +116,7 @@ const ExcelService = (() => {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     try {
-      const response = await fetch('http://localhost:3000/api/data', { signal: controller.signal });
+      const response = await fetch('/api/data', { signal: controller.signal });
       clearTimeout(timeoutId);
       if (!response.ok) throw new Error('Backend not available.');
 
@@ -150,13 +150,27 @@ const ExcelService = (() => {
     localStorage.setItem('nessa_offline_db', JSON.stringify(cachedData));
   }
 
+  function getAuthHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    try {
+      const raw = localStorage.getItem('nessa_jwt_token');
+      if (raw) {
+        const decoded = JSON.parse(raw);
+        if (decoded && decoded.token) {
+          headers['Authorization'] = `Bearer ${decoded.token}`;
+        }
+      }
+    } catch(e) {}
+    return headers;
+  }
+
   // API Methods
   async function addProduct(product) {
     if (!cachedData) await loadData();
     try {
-      const response = await fetch('http://localhost:3000/api/products', {
+      const response = await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(product)
       });
       if (!response.ok) throw new Error('Failed to add product');
@@ -175,9 +189,9 @@ const ExcelService = (() => {
   async function updateProduct(id, updates) {
     if (!cachedData) await loadData();
     try {
-      const response = await fetch(`http://localhost:3000/api/products/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates)
       });
       if (!response.ok) throw new Error('Failed to update product');
@@ -197,8 +211,9 @@ const ExcelService = (() => {
   async function deleteProduct(id) {
     if (!cachedData) await loadData();
     try {
-      const response = await fetch(`http://localhost:3000/api/products/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Failed to delete product');
       await loadData(true); // reload memory
@@ -214,24 +229,34 @@ const ExcelService = (() => {
   async function placeOrder(orderData) {
     if (!cachedData) await loadData();
     try {
-      const response = await fetch('http://localhost:3000/api/orders', {
+      const response = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(orderData)
       });
-      if (!response.ok) throw new Error('Failed to place order');
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || errJson.message || 'Failed to place order');
+      }
       await loadData(true); // reload memory
       return await response.json();
     } catch(err) {
-      console.warn("Backend unavailable. Simulating placeOrder locally.");
-      const { userId, items, paymentMethod } = orderData;
+      console.warn("Backend unavailable. Simulating placeOrder locally.", err.message);
+      if (err.message && err.message !== 'Failed to fetch' && !err.message.includes('Backend unavailable')) {
+        throw err;
+      }
+      const { userId, items, paymentMethod, customerName, customerEmail, deliveryPhone, deliveryAddress } = orderData;
       let maxOrderId = cachedData.orders.reduce((max, o) => o.id > max ? o.id : max, 0);
-      const nowIso = new Date().toISOString();
+      const nowIso = new Date().toISOString().split('T')[0];
       for (let item of items) {
         maxOrderId++;
         cachedData.orders.push({
           id: maxOrderId,
-          userId: userId,
+          userId: userId || 999,
+          customerName: customerName || 'Customer',
+          customerEmail: customerEmail || '',
+          deliveryPhone: deliveryPhone || '',
+          deliveryAddress: deliveryAddress || '',
           productId: item.productId,
           quantity: item.quantity,
           total: item.total,
@@ -250,7 +275,7 @@ const ExcelService = (() => {
   async function registerUser(userData) {
     if (!cachedData) await loadData();
     try {
-      const response = await fetch('http://localhost:3000/api/register', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
